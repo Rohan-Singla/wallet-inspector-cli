@@ -1,23 +1,13 @@
-use std::str::FromStr;
 
 use ::clap::{Arg, Command};
 
-use serde_json::to_string;
-// use crate::serde::{back_to_dog, convert_dog};
-use solana_client::nonblocking::rpc_client::RpcClient;
-use solana_commitment_config::CommitmentConfig;
 use solana_sdk::{
-    native_token::LAMPORTS_PER_SOL,
-    pubkey::{self, Pubkey},
-    signature::Keypair,
     signer::Signer,
 };
 mod clap;
 mod http_reqwest;
 mod serde;
-use std::fs;
 
-use crate::utils::{airdrop_sol, check_balance};
 mod mylib;
 mod utils;
 

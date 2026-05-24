@@ -16,6 +16,11 @@ mod clap;
 mod http_reqwest;
 mod serde;
 use std::fs;
+
+use crate::utils::{airdrop_sol, check_balance};
+mod mylib;
+mod utils;
+
 #[tokio::main]
 async fn main() {
     // Serialize
@@ -60,6 +65,21 @@ async fn main() {
                     Arg::new("create"), // .short('c')
                 ),
         )
+        .subcommand(
+            Command::new("send_sol")
+                .about("this command is used to transfer SOl !")
+                .arg(
+                    Arg::new("reciever_address")
+                        .alias("reciever")
+                        .required(true)
+                        .help("This argument takes reciever address"),
+                )
+                .arg(
+                    Arg::new("amount")
+                        .help("this argumemt takes the amount of SOL you want to send !")
+                        .required(true),
+                ),
+        )
         .get_matches();
 
     match cli.subcommand() {
@@ -68,77 +88,54 @@ async fn main() {
                 .get_one::<String>("address")
                 .expect("Address is required");
 
-            println!("{}", address_str);
+            let airdrop = sub_m.get_one::<String>("airdrop");
 
-            let client = RpcClient::new_with_commitment(
-                "https://api.mainnet-beta.solana.com".to_string(),
-                CommitmentConfig::confirmed(),
-            );
+            // If airdrop is Some, perform the airdrop first
+            if let Some(airdrop_amount) = airdrop {
+                // Call airdrop_sol, which returns a future, so .await it
+                let result = utils::airdrop_sol(address_str, Some(airdrop_amount)).await;
 
-            let address = Pubkey::from_str(address_str).expect("Invalid address format");
-
-            let balance = client.get_balance(&address).await.unwrap();
-
-            println!("Balance: {} SOL", balance as f64 / LAMPORTS_PER_SOL as f64);
-
-            if let Some(amount_str) = sub_m.get_one::<String>("airdrop") {
-                let amount: f64 = amount_str.parse().expect("Invalid airdrop amount");
-                let lamports = (amount * LAMPORTS_PER_SOL as f64) as u64;
-
-                let devnet_client = RpcClient::new_with_commitment(
-                    "https://api.devnet.solana.com".to_string(),
-                    CommitmentConfig::confirmed(),
-                );
-
-                let airdrop_sig = devnet_client
-                    .request_airdrop(&address, lamports)
-                    .await
-                    .unwrap();
-
-                let confirmed = devnet_client
-                    .confirm_transaction(&airdrop_sig)
-                    .await
-                    .unwrap();
-
-                if confirmed {
-                    println!("Airdrop successful: {}", airdrop_sig);
-                } else {
-                    println!("Airdrop failed or not confirmed.");
+                match result {
+                    Some(signature) => println!("Airdrop signature: {}", signature),
+                    None => println!("Airdrop failed or not confirmed."),
                 }
             }
+
+            // Check and print balance regardless of airdrop
+            let balance = utils::check_balance(address_str).await;
+            println!("Address: {}", address_str);
+            println!("Balance: {} SOL", balance);
+        }
+        Some(("create-wallet", _sub_m)) => {
+            let result = utils::create_or_load();
+
+            println!("Address: {}", result.pubkey());
         }
 
-        Some(("create-wallet", _sub_m)) => {
-            if std::path::Path::new("wallet.json").exists() {
-                println!("Wallet already exists. Loading wallet...");
+        Some(("send_sol", sub_m)) => {
 
-                let readwallet = fs::read_to_string("wallet.json").unwrap();
-
-                let secret_vec: Vec<u8> = serde_json::from_str(&readwallet).unwrap();
-
-                let secret_array: [u8; 64] = secret_vec.try_into().unwrap();
-
-                let keypair = Keypair::try_from(secret_array.as_slice()).unwrap();
-
-                println!("Wallet loaded!");
-                println!("Address: {}", keypair.pubkey());
-
-            } else {
-                println!("Creating new wallet...");
-
-                let keypair = Keypair::new();
-
-                let address = keypair.pubkey();
-
-                let secret = keypair.to_bytes().to_vec();
-
-                let secretjson = serde_json::to_string(&secret).unwrap();
-
-                fs::write("wallet.json", secretjson).unwrap();
-
-                println!("New wallet created!");
-                println!("Address: {}", address);
-            }
+            println!("Sending SOL ...");
+        
+            let wallet =
+                utils::create_or_load();
+        
+            let amount: f64 =
+                sub_m
+                .get_one::<String>("amount")
+                .unwrap()
+                .parse()
+                .unwrap();
+        
+            let receiver_address =
+                sub_m
+                .get_one::<String>("reciever_address")
+                .unwrap();
+        
+            utils::send_sol(
+                &wallet,
+                amount,
+                receiver_address,
+            ).await;
         }
 
         _ => {

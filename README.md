@@ -1,6 +1,7 @@
-# Wallet Inspector CLI
+Wallet Inspector CLI
 
 A CLI-based Solana wallet inspector built with Rust using the Solana SDK and Clap.
+
 ---
 
 # Features

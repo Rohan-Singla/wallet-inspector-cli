@@ -4,28 +4,11 @@ use ::clap::{Arg, Command};
 use solana_sdk::{
     signer::Signer,
 };
-mod clap;
-mod http_reqwest;
-mod serde;
-
-mod mylib;
+mod rpc_client;
 mod utils;
 
 #[tokio::main]
 async fn main() {
-    // Serialize
-    // let json = convert_dog();
-
-    // println!("JSON: {}", json);
-
-    // Deserialize
-    // let dog = back_to_dog(&json);
-
-    // println!("Dog Struct: {:?}", dog);
-
-    // let result = http_reqwest::send_request();
-
-    // clap::try_clap();
 
     let cli = Command::new("Wallet-Inspector")
         .about("This is a CLI based Solana wallet inspector created in rust !")

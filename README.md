@@ -1,14 +1,6 @@
 # Wallet Inspector CLI
 
 A CLI-based Solana wallet inspector built with Rust using the Solana SDK and Clap.
-
-This project allows you to:
-
-- Create or load a Solana wallet
-- Inspect wallet balances on Devnet
-- Airdrop SOL on Devnet
-- Send SOL transactions between wallets
-
 ---
 
 # Features
@@ -30,45 +22,6 @@ This project allows you to:
 - Solana Client
 - Clap
 
----
-
-# Project Structure
-
-```txt
-src/
-├── main.rs
-├── utils.rs
-├── mylib/
-│   ├── mod.rs
-│   └── myclient.rs
-├── clap.rs
-├── serde.rs
-└── http_reqwest.rs
-```
-
----
-
-# Installation
-
-## 1. Clone the repository
-
-```bash
-git clone <your-repo-url>
-cd <project-name>
-```
-
----
-
-## 2. Install Rust
-
-https://www.rust-lang.org/tools/install
-
-Verify installation:
-
-```bash
-rustc --version
-cargo --version
-```
 
 ---
 
@@ -171,9 +124,6 @@ This project uses:
 ```txt
 https://api.devnet.solana.com
 ```
-
-You can get free Devnet SOL for testing purposes.
-
 ---
 
 # Important Notes
@@ -182,34 +132,6 @@ You can get free Devnet SOL for testing purposes.
 - Invalid wallet addresses will cause parsing errors
 - Transactions are executed asynchronously using Tokio
 - This project is intended for learning and development purposes
-
----
-
-# Dependencies
-
-Example crates used:
-
-```toml
-tokio
-clap
-solana-sdk
-solana-client
-serde
-serde_json
-```
-
----
-
-# Learning Goals
-
-This project helps practice:
-
-- Rust modules and imports
-- Async Rust
-- Solana RPC interaction
-- CLI development with Clap
-- Wallet management
-- Transaction handling
 
 ---
 

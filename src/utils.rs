@@ -9,7 +9,7 @@ use solana_sdk::{
 };
 use solana_system_interface::instruction::transfer;
 
-use crate::mylib::myclient::get_rpc_client;
+use crate::rpc_client;
 
 pub fn create_or_load() -> Keypair {
     if std::path::Path::new("wallet.json").exists() {
@@ -33,7 +33,7 @@ pub fn create_or_load() -> Keypair {
 }
 
 pub async fn airdrop_sol(address_str: &str, airdrop: Option<&String>) -> Option<Signature> {
-    let client = get_rpc_client();
+    let client = rpc_client::get_rpc_client();
     let address = Pubkey::from_str(address_str).expect("Invalid address format");
 
     if let Some(amount_str) = airdrop {
@@ -58,14 +58,14 @@ pub async fn airdrop_sol(address_str: &str, airdrop: Option<&String>) -> Option<
 }
 
 pub async fn check_balance(address_str: &str) -> f64 {
-    let client = get_rpc_client();
+    let client = rpc_client::get_rpc_client();
     let address = Pubkey::from_str(address_str).expect("Invalid address format");
     let balance = client.get_balance(&address).await.unwrap();
     balance as f64 / LAMPORTS_PER_SOL as f64
 }
 
 pub async fn send_sol(wallet: &Keypair, amount: f64, receiver_address: &str) {
-    let client = get_rpc_client();
+    let client = rpc_client::get_rpc_client();
 
     let receiver = Pubkey::from_str(receiver_address).expect("Invalid receiver address");
     let lamports = (amount * LAMPORTS_PER_SOL as f64) as u64;
